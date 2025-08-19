@@ -37,7 +37,10 @@ public class CreateProjectEndpoint
         });
     }
 
-    public override async Task HandleAsync(CreateProjectCommand req, CancellationToken ct)
+    public override async Task<ProjectResponse> ExecuteAsync(
+        CreateProjectCommand req,
+        CancellationToken ct
+    )
     {
         var project = new Project
         {
@@ -52,8 +55,6 @@ public class CreateProjectEndpoint
         await _dbContext.SaveChangesAsync(ct);
 
         var response = Map.FromEntity(project);
-
-        HttpContext.Response.StatusCode = 201;
-        await HttpContext.Response.WriteAsJsonAsync(response, ct);
+        return response;
     }
 }

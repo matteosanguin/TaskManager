@@ -11,7 +11,7 @@ public partial class GetProjectsMapper
 {
     public partial IEnumerable<ProjectResponse> ToResponse(IEnumerable<Project> projects);
 
-    public IEnumerable<ProjectResponse> FromEntity(IEnumerable<Project> projects)
+    public new IEnumerable<ProjectResponse> FromEntity(IEnumerable<Project> projects)
     {
         return ToResponse(projects);
     }
