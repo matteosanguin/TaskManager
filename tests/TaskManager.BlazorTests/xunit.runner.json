@@ -1,0 +1,6 @@
+{
+    "parallelizeTestCollections": false,
+    "diagnosticMessages": true,
+    "methodDisplay": "method",
+    "methodDisplayOptions": "all"
+}
