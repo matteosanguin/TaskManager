@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+
+# Build results
+bin/
+obj/
+
+# IDE
+.vs/
+.vscode/
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# User-specific files
+*.user
+*.suo
+
+# Database
+*.db
+*.sqlite
+
+# NuGet
+packages/
+
+# Test results
+TestResults/
+
+# Code coverage
+*.coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS generated files
+Thumbs.db
+.DS_Store
+
+# Backup files
+*.bak
+
+# Compiled files
+*.exe
+*.dll
+
+# Docker
+.dockerignore
+
+# Visual Studio
+*.userosscache
+*.sln.docstates
+
+# Rider
+*.DotSettings.user
+
+# Mac
+**/.DS_Store
