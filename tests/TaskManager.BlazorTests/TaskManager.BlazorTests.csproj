@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\TaskManager.BlazorApp\TaskManager.BlazorApp.csproj" />
+    <ProjectReference Include="..\..\src\TaskManager.BlazorApp\TaskManager.BlazorApp.csproj" />
   </ItemGroup>
 
 </Project>
