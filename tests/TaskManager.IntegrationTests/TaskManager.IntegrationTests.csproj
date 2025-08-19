@@ -23,7 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\TaskManager.WebApi\TaskManager.WebApi.csproj" />
+    <ProjectReference Include="..\..\src\TaskManager.WebApi\TaskManager.WebApi.csproj" />
+    <ProjectReference Include="..\..\src\TaskManager.Infrastructure\TaskManager.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
