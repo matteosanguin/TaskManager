@@ -159,3 +159,79 @@ public async Task GetByIdAsync_WithValidId_ReturnsEntity()
     Assert.Equal("Test Project", result.Name);
 }
 ```
+
+### Testing con MockDbSetHelper
+
+Per testare i repository che utilizzano Entity Framework, il progetto include un helper specializzato che risolve i problemi comuni del mocking di `DbSet<T>`:
+
+```csharp
+public class ProjectRepositoryTests : TestBase
+{
+    private readonly Mock<KanboardDbContext> _mockContext;
+    private readonly ProjectRepository _repository;
+
+    public ProjectRepositoryTests()
+    {
+        _mockContext = new Mock<KanboardDbContext>(new DbContextOptions<KanboardDbContext>());
+
+        // Setup di base per evitare null reference nel costruttore del repository
+        var emptyMockDbSet = new Mock<DbSet<Project>>();
+        _mockContext.Setup(c => c.Set<Project>()).Returns(emptyMockDbSet.Object);
+
+        _repository = new ProjectRepository(_mockContext.Object);
+    }
+
+    [Fact]
+    public async Task GetByOwnerIdAsync_WithValidOwnerId_ReturnsProjects()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var projects = new List<Project>
+        {
+            new Project { Id = Guid.NewGuid(), Name = "Project 1", OwnerId = ownerId },
+            new Project { Id = Guid.NewGuid(), Name = "Project 2", OwnerId = ownerId }
+        };
+
+        var mockDbSet = MockDbSetHelper.CreateMockDbSet(projects);
+        _mockContext.Setup(c => c.Set<Project>()).Returns(mockDbSet.Object);
+
+        var repository = new ProjectRepository(_mockContext.Object);
+
+        // Act
+        var result = await repository.GetByOwnerIdAsync(ownerId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count());
+        Assert.All(result, p => Assert.Equal(ownerId, p.OwnerId));
+    }
+}
+```
+
+**Vantaggi del MockDbSetHelper:**
+
+- ✅ **Supporto completo per operazioni LINQ asincrone** (`ToListAsync`, `FirstOrDefaultAsync`, `Where`, `OrderBy`)
+- ✅ **Risoluzione degli errori `System.NotSupportedException`** comuni nel mocking di Entity Framework
+- ✅ **Implementazione corretta di `IAsyncQueryProvider`** e `IAsyncEnumerable<T>`
+- ✅ **Test affidabili e manutenibili** per tutti i tipi di query repository
+
+### Pattern di Test Implementato
+
+Il progetto ha raggiunto **100% di successo** nei repository tests utilizzando questo pattern:
+
+- **BaseRepositoryTests**: 9/9 test ✅
+- **UserRepositoryTests**: 4/4 test ✅
+- **ProjectRepositoryTests**: 3/3 test ✅
+- **TaskRepositoryTests**: 4/4 test ✅
+- **ColumnRepositoryTests**: 2/2 test ✅
+- **BoardRepositoryTests**: 2/2 test ✅
+
+**Totale: 24 repository tests, 100% pass rate**
+
+### Best Practices per Repository Testing
+
+1. **Setup corretto del context mock** nel costruttore per evitare null reference
+2. **Utilizzo di MockDbSetHelper** per test che richiedono query LINQ
+3. **Configurazione specifica per ogni test** invece di setup globale
+4. **Gestione dei namespace conflicts** con alias (`SystemTask`, `DomainTask`)
+5. **Test di scenari positivi e negativi** per coverage completa

@@ -54,7 +54,8 @@ public class CreateProjectEndpoint
         _dbContext.Projects.Add(project);
         await _dbContext.SaveChangesAsync(ct);
 
-        var response = Map.FromEntity(project);
-        return response;
+        // Chiamata diretta al mapper invece di usare la proprietà Map
+        var mapper = new CreateProjectMapper();
+        return mapper.FromEntity(project);
     }
 }

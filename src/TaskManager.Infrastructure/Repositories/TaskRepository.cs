@@ -10,7 +10,7 @@ namespace TaskManager.Infrastructure.Repositories
     /// </summary>
     public class TaskRepository : BaseRepository<Domain.Entities.Task>, ITaskRepository
     {
-        private readonly KanboardDbContext _context;
+        private new readonly KanboardDbContext _context;
 
         /// <summary>
         /// Costruttore.
@@ -29,7 +29,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di task nella colonna</returns>
         public async Task<IEnumerable<Domain.Entities.Task>> GetByColumnIdAsync(Guid columnId)
         {
-            return await _context.Tasks.Where(t => t.ColumnId == columnId).ToListAsync();
+            return await _dbSet.Where(t => t.ColumnId == columnId).ToListAsync();
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di task assegnati all'utente</returns>
         public async Task<IEnumerable<Domain.Entities.Task>> GetByAssigneeIdAsync(Guid assigneeId)
         {
-            return await _context.Tasks.Where(t => t.AssigneeId == assigneeId).ToListAsync();
+            return await _dbSet.Where(t => t.AssigneeId == assigneeId).ToListAsync();
         }
 
         /// <summary>
@@ -49,8 +49,8 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di task che corrispondono alla query</returns>
         public async Task<IEnumerable<Domain.Entities.Task>> SearchTasksAsync(string query)
         {
-            return await _context
-                .Tasks.Where(t => t.Title.Contains(query) || t.Description.Contains(query))
+            return await _dbSet
+                .Where(t => t.Title.Contains(query) || t.Description.Contains(query))
                 .ToListAsync();
         }
 
@@ -63,7 +63,7 @@ namespace TaskManager.Infrastructure.Repositories
         {
             // Per ora restituiamo solo il task stesso, in futuro potremmo implementare
             // una vera cronologia dei cambiamenti
-            var task = await _context.Tasks.FindAsync(taskId);
+            var task = await _dbSet.FindAsync(taskId);
             return task != null ? new[] { task } : Enumerable.Empty<Domain.Entities.Task>();
         }
     }

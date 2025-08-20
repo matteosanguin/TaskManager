@@ -23,8 +23,10 @@ namespace TaskManager.Infrastructure.Repositories
         /// <param name="context">Context del database</param>
         public BaseRepository(KanboardDbContext context)
         {
-            _context = context;
-            _dbSet = context.Set<T>();
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _dbSet =
+                context.Set<T>()
+                ?? throw new InvalidOperationException($"DbSet for {typeof(T).Name} is null");
         }
 
         /// <summary>
@@ -34,6 +36,9 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>L'entità trovata o null se non esiste</returns>
         public async Task<T?> GetByIdAsync(Guid id)
         {
+            if (_dbSet == null)
+                throw new InvalidOperationException("DbSet is not initialized");
+
             return await _dbSet.FindAsync(id);
         }
 
@@ -43,6 +48,9 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di tutte le entità</returns>
         public async Task<IEnumerable<T>> GetAllAsync()
         {
+            if (_dbSet == null)
+                throw new InvalidOperationException("DbSet is not initialized");
+
             return await _dbSet.ToListAsync();
         }
 
@@ -53,6 +61,9 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di entità filtrate</returns>
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
         {
+            if (_dbSet == null)
+                throw new InvalidOperationException("DbSet is not initialized");
+
             return await _dbSet.Where(predicate).ToListAsync();
         }
 
@@ -62,6 +73,9 @@ namespace TaskManager.Infrastructure.Repositories
         /// <param name="entity">Entità da aggiungere</param>
         public async Task AddAsync(T entity)
         {
+            if (_dbSet == null)
+                throw new InvalidOperationException("DbSet is not initialized");
+
             await _dbSet.AddAsync(entity);
         }
 
@@ -71,6 +85,9 @@ namespace TaskManager.Infrastructure.Repositories
         /// <param name="entities">Entità da aggiungere</param>
         public async Task AddRangeAsync(IEnumerable<T> entities)
         {
+            if (_dbSet == null)
+                throw new InvalidOperationException("DbSet is not initialized");
+
             await _dbSet.AddRangeAsync(entities);
         }
 
@@ -80,6 +97,9 @@ namespace TaskManager.Infrastructure.Repositories
         /// <param name="entity">Entità da aggiornare</param>
         public void Update(T entity)
         {
+            if (_dbSet == null)
+                throw new InvalidOperationException("DbSet is not initialized");
+
             _dbSet.Update(entity);
         }
 
@@ -89,6 +109,9 @@ namespace TaskManager.Infrastructure.Repositories
         /// <param name="entity">Entità da rimuovere</param>
         public void Remove(T entity)
         {
+            if (_dbSet == null)
+                throw new InvalidOperationException("DbSet is not initialized");
+
             _dbSet.Remove(entity);
         }
 
@@ -98,6 +121,9 @@ namespace TaskManager.Infrastructure.Repositories
         /// <param name="entities">Entità da rimuovere</param>
         public void RemoveRange(IEnumerable<T> entities)
         {
+            if (_dbSet == null)
+                throw new InvalidOperationException("DbSet is not initialized");
+
             _dbSet.RemoveRange(entities);
         }
     }

@@ -24,10 +24,10 @@ namespace TaskManager.UnitTests.Domain.ValueObjects
         public void Create_WithNullEmail_ShouldThrowArgumentException()
         {
             // Arrange
-            string emailValue = null;
+            string? emailValue = null;
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => Email.Create(emailValue));
+            Assert.Throws<ArgumentException>(() => Email.Create(emailValue!));
         }
 
         [Fact]

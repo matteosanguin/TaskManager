@@ -10,7 +10,7 @@ namespace TaskManager.Infrastructure.Repositories
     /// </summary>
     public class ColumnRepository : BaseRepository<Column>, IColumnRepository
     {
-        private readonly KanboardDbContext _context;
+        private new readonly KanboardDbContext _context;
 
         /// <summary>
         /// Costruttore.
@@ -29,7 +29,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di colonne del progetto</returns>
         public async Task<IEnumerable<Column>> GetByProjectIdAsync(Guid projectId)
         {
-            return await _context.Columns.Where(c => c.ProjectId == projectId).ToListAsync();
+            return await _dbSet.Where(c => c.ProjectId == projectId).ToListAsync();
         }
 
         /// <summary>
@@ -39,8 +39,8 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di colonne ordinate per posizione</returns>
         public async Task<IEnumerable<Column>> GetByProjectIdOrderedAsync(Guid projectId)
         {
-            return await _context
-                .Columns.Where(c => c.ProjectId == projectId)
+            return await _dbSet
+                .Where(c => c.ProjectId == projectId)
                 .OrderBy(c => c.Position)
                 .ToListAsync();
         }

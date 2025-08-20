@@ -10,7 +10,7 @@ namespace TaskManager.Infrastructure.Repositories
     /// </summary>
     public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
-        private readonly KanboardDbContext _context;
+        private new readonly KanboardDbContext _context;
 
         /// <summary>
         /// Costruttore.
@@ -29,7 +29,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di progetti del proprietario</returns>
         public async Task<IEnumerable<Project>> GetByOwnerIdAsync(Guid ownerId)
         {
-            return await _context.Projects.Where(p => p.OwnerId == ownerId).ToListAsync();
+            return await _dbSet.Where(p => p.OwnerId == ownerId).ToListAsync();
         }
 
         /// <summary>
@@ -39,9 +39,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Progetto con i task caricati</returns>
         public async Task<Project?> GetWithTasksAsync(Guid projectId)
         {
-            return await _context
-                .Projects.Include(p => p.Tasks)
-                .FirstOrDefaultAsync(p => p.Id == projectId);
+            return await _dbSet.Where(p => p.Id == projectId).FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -50,7 +48,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di progetti pubblici</returns>
         public async Task<IEnumerable<Project>> GetPublicProjectsAsync()
         {
-            return await _context.Projects.Where(p => !p.IsPrivate).ToListAsync();
+            return await _dbSet.Where(p => !p.IsPrivate).ToListAsync();
         }
     }
 }

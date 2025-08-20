@@ -10,7 +10,7 @@ namespace TaskManager.Infrastructure.Repositories
     /// </summary>
     public class UserRepository : BaseRepository<User>, IUserRepository
     {
-        private readonly KanboardDbContext _context;
+        private new readonly KanboardDbContext _context;
 
         /// <summary>
         /// Costruttore.
@@ -29,7 +29,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>L'utente trovato o null se non esiste</returns>
         public async Task<User?> GetByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _dbSet.FirstOrDefaultAsync(u => u.Username == username);
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>L'utente trovato o null se non esiste</returns>
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email.Value == email);
+            return await _dbSet.FirstOrDefaultAsync(u => u.Email.Value == email);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Lista di utenti attivi</returns>
         public async Task<IEnumerable<User>> GetActiveUsersAsync()
         {
-            return await _context.Users.Where(u => u.IsActive).ToListAsync();
+            return await _dbSet.Where(u => u.IsActive).ToListAsync();
         }
     }
 }

@@ -1,12 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using TaskManager.Domain.Entities;
 using TaskManager.Infrastructure.Persistence;
 using TaskManager.Infrastructure.Repositories;
-using TaskManager.UnitTests;
+using TaskManager.UnitTests.Helpers;
 using Xunit;
+using SystemTask = System.Threading.Tasks.Task;
 
 namespace TaskManager.UnitTests.Repositories
 {
@@ -20,17 +23,20 @@ namespace TaskManager.UnitTests.Repositories
         {
             _mockContext = new Mock<KanboardDbContext>(new DbContextOptions<KanboardDbContext>());
             _mockDbSet = new Mock<DbSet<Project>>();
+
+            // Setup del context mock prima di creare il repository
             _mockContext.Setup(c => c.Set<Project>()).Returns(_mockDbSet.Object);
+
             _repository = new BaseRepository<Project>(_mockContext.Object);
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task GetByIdAsync_WithValidId_ReturnsEntity()
+        public async SystemTask GetByIdAsync_WithValidId_ReturnsEntity()
         {
             // Arrange
-            var projectId = System.Guid.NewGuid();
+            var projectId = Guid.NewGuid();
             var project = new Project { Id = projectId, Name = "Test Project" };
-            _mockDbSet.Setup(m => m.FindAsync(projectId)).Returns(new ValueTask<Project>(project));
+            _mockDbSet.Setup(m => m.FindAsync(projectId)).Returns(new ValueTask<Project?>(project));
 
             // Act
             var result = await _repository.GetByIdAsync(projectId);
@@ -42,13 +48,13 @@ namespace TaskManager.UnitTests.Repositories
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task GetByIdAsync_WithInvalidId_ReturnsNull()
+        public async SystemTask GetByIdAsync_WithInvalidId_ReturnsNull()
         {
             // Arrange
-            var projectId = System.Guid.NewGuid();
+            var projectId = Guid.NewGuid();
             _mockDbSet
                 .Setup(m => m.FindAsync(projectId))
-                .Returns(new ValueTask<Project>((Project)null));
+                .Returns(new ValueTask<Project?>((Project?)null));
 
             // Act
             var result = await _repository.GetByIdAsync(projectId);
@@ -58,31 +64,24 @@ namespace TaskManager.UnitTests.Repositories
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task GetAllAsync_ReturnsAllEntities()
+        public async SystemTask GetAllAsync_ReturnsAllEntities()
         {
             // Arrange
             var projects = new List<Project>
             {
-                new Project { Id = System.Guid.NewGuid(), Name = "Project 1" },
-                new Project { Id = System.Guid.NewGuid(), Name = "Project 2" }
-            }.AsQueryable();
+                new Project { Id = Guid.NewGuid(), Name = "Project 1" },
+                new Project { Id = Guid.NewGuid(), Name = "Project 2" }
+            };
 
-            _mockDbSet.As<IQueryable<Project>>().Setup(m => m.Provider).Returns(projects.Provider);
-            _mockDbSet
-                .As<IQueryable<Project>>()
-                .Setup(m => m.Expression)
-                .Returns(projects.Expression);
-            _mockDbSet
-                .As<IQueryable<Project>>()
-                .Setup(m => m.ElementType)
-                .Returns(projects.ElementType);
-            _mockDbSet
-                .As<IQueryable<Project>>()
-                .Setup(m => m.GetEnumerator())
-                .Returns(projects.GetEnumerator());
+            // Sostituisco il mock esistente con uno configurato per GetAllAsync
+            var mockDbSet = MockDbSetHelper.CreateMockDbSet(projects);
+            _mockContext.Setup(c => c.Set<Project>()).Returns(mockDbSet.Object);
+
+            // Creo un nuovo repository con il mock configurato
+            var repository = new BaseRepository<Project>(_mockContext.Object);
 
             // Act
-            var result = await _repository.GetAllAsync();
+            var result = await repository.GetAllAsync();
 
             // Assert
             Assert.NotNull(result);
@@ -90,43 +89,35 @@ namespace TaskManager.UnitTests.Repositories
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task FindAsync_WithValidPredicate_ReturnsFilteredEntities()
+        public async SystemTask FindAsync_WithValidPredicate_ReturnsFilteredEntities()
         {
             // Arrange
             var projects = new List<Project>
             {
                 new Project
                 {
-                    Id = System.Guid.NewGuid(),
+                    Id = Guid.NewGuid(),
                     Name = "Project 1",
                     IsPrivate = false
                 },
                 new Project
                 {
-                    Id = System.Guid.NewGuid(),
+                    Id = Guid.NewGuid(),
                     Name = "Project 2",
                     IsPrivate = true
                 }
-            }.AsQueryable();
+            };
 
-            _mockDbSet.As<IQueryable<Project>>().Setup(m => m.Provider).Returns(projects.Provider);
-            _mockDbSet
-                .As<IQueryable<Project>>()
-                .Setup(m => m.Expression)
-                .Returns(projects.Expression);
-            _mockDbSet
-                .As<IQueryable<Project>>()
-                .Setup(m => m.ElementType)
-                .Returns(projects.ElementType);
-            _mockDbSet
-                .As<IQueryable<Project>>()
-                .Setup(m => m.GetEnumerator())
-                .Returns(projects.GetEnumerator());
+            // Sostituisco il mock esistente con uno configurato per FindAsync
+            var mockDbSet = MockDbSetHelper.CreateMockDbSet(projects);
+            _mockContext.Setup(c => c.Set<Project>()).Returns(mockDbSet.Object);
+
+            // Creo un nuovo repository con il mock configurato
+            var repository = new BaseRepository<Project>(_mockContext.Object);
 
             // Act
-            System.Linq.Expressions.Expression<Func<Project, bool>> predicate = p =>
-                p.IsPrivate == false;
-            var result = await _repository.FindAsync(predicate);
+            Expression<Func<Project, bool>> predicate = p => p.IsPrivate == false;
+            var result = await repository.FindAsync(predicate);
 
             // Assert
             Assert.NotNull(result);
@@ -135,10 +126,10 @@ namespace TaskManager.UnitTests.Repositories
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task AddAsync_AddsEntityToContext()
+        public async SystemTask AddAsync_AddsEntityToContext()
         {
             // Arrange
-            var project = new Project { Id = System.Guid.NewGuid(), Name = "New Project" };
+            var project = new Project { Id = Guid.NewGuid(), Name = "New Project" };
 
             // Act
             await _repository.AddAsync(project);
@@ -148,13 +139,13 @@ namespace TaskManager.UnitTests.Repositories
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task AddRangeAsync_AddsEntitiesToContext()
+        public async SystemTask AddRangeAsync_AddsEntitiesToContext()
         {
             // Arrange
             var projects = new List<Project>
             {
-                new Project { Id = System.Guid.NewGuid(), Name = "Project 1" },
-                new Project { Id = System.Guid.NewGuid(), Name = "Project 2" }
+                new Project { Id = Guid.NewGuid(), Name = "Project 1" },
+                new Project { Id = Guid.NewGuid(), Name = "Project 2" }
             };
 
             // Act
@@ -168,7 +159,7 @@ namespace TaskManager.UnitTests.Repositories
         public void Update_UpdatesEntityInContext()
         {
             // Arrange
-            var project = new Project { Id = System.Guid.NewGuid(), Name = "Updated Project" };
+            var project = new Project { Id = Guid.NewGuid(), Name = "Updated Project" };
 
             // Act
             _repository.Update(project);
@@ -181,7 +172,7 @@ namespace TaskManager.UnitTests.Repositories
         public void Remove_RemovesEntityFromContext()
         {
             // Arrange
-            var project = new Project { Id = System.Guid.NewGuid(), Name = "Project to Remove" };
+            var project = new Project { Id = Guid.NewGuid(), Name = "Project to Remove" };
 
             // Act
             _repository.Remove(project);
@@ -196,8 +187,8 @@ namespace TaskManager.UnitTests.Repositories
             // Arrange
             var projects = new List<Project>
             {
-                new Project { Id = System.Guid.NewGuid(), Name = "Project 1" },
-                new Project { Id = System.Guid.NewGuid(), Name = "Project 2" }
+                new Project { Id = Guid.NewGuid(), Name = "Project 1" },
+                new Project { Id = Guid.NewGuid(), Name = "Project 2" }
             };
 
             // Act

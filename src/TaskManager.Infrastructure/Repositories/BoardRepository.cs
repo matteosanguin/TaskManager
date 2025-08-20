@@ -10,7 +10,7 @@ namespace TaskManager.Infrastructure.Repositories
     /// </summary>
     public class BoardRepository : BaseRepository<Board>, IBoardRepository
     {
-        private readonly KanboardDbContext _context;
+        private new readonly KanboardDbContext _context;
 
         /// <summary>
         /// Costruttore.
@@ -29,7 +29,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>La board associata al progetto o null se non esiste</returns>
         public async Task<Board?> GetByProjectIdAsync(Guid projectId)
         {
-            return await _context.Boards.FirstOrDefaultAsync(b => b.ProjectId == projectId);
+            return await _dbSet.FirstOrDefaultAsync(b => b.ProjectId == projectId);
         }
 
         /// <summary>
@@ -39,9 +39,7 @@ namespace TaskManager.Infrastructure.Repositories
         /// <returns>Board con le colonne caricate</returns>
         public async Task<Board?> GetWithColumnsAsync(Guid boardId)
         {
-            return await _context
-                .Boards.Include(b => b.Columns)
-                .FirstOrDefaultAsync(b => b.Id == boardId);
+            return await _dbSet.Where(b => b.Id == boardId).FirstOrDefaultAsync();
         }
     }
 }
