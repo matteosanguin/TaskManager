@@ -2,7 +2,9 @@ using System.Reflection; // Aggiungere questo using
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Application.Abstractions;
+using TaskManager.Domain.Repositories;
 using TaskManager.Infrastructure.Persistence;
+using TaskManager.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,13 @@ builder.Services.AddDbContext<KanboardDbContext>(options =>
 );
 
 builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<KanboardDbContext>());
+
+// Register repositories
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBoardRepository, BoardRepository>();
+builder.Services.AddScoped<IColumnRepository, ColumnRepository>();
 
 // Add FastEndpoints
 builder.Services.AddFastEndpoints(o =>
