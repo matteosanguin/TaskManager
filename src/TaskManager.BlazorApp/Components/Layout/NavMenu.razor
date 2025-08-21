@@ -1,13 +1,27 @@
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">TaskManager.BlazorApp</a>
-    </div>
-</div>
+<MudAppBar>
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => NavMenuExpanded = !NavMenuExpanded)" />
+    <MudText Typo="Typo.h6" Class="ms-2">TaskManager</MudText>
+    <MudSpacer />
+    <AuthorizeView>
+        <Authorized>
+            <MudText>Hello, @context.User.Identity?.Name</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Href="/logout" />
+        </Authorized>
+        <NotAuthorized>
+            <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" Href="/login" />
+            <MudIconButton Icon="@Icons.Material.Filled.AppRegistration" Color="Color.Inherit" Href="/register" />
+        </NotAuthorized>
+    </AuthorizeView>
+</MudAppBar>
+<MudDrawer @bind-Open="@NavMenuExpanded">
+    <MudDrawerHeader>
+        <MudText Typo="Typo.h6">Menu</MudText>
+    </MudDrawerHeader>
+    <MudNavMenu>
+        <MudNavLink Href="/" Match="NavLinkMatch.All">Home</MudNavLink>
+    </MudNavMenu>
+</MudDrawer>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-
-    </nav>
-</div>
+@code {
+    private bool NavMenuExpanded { get; set; } = true;
+}

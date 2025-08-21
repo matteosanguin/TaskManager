@@ -1,0 +1,41 @@
+@page "/register"
+@using System.Net.Http.Json
+@using TaskManager.Shared.Requests
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<MudGrid Justify="Justify.Center" Class="mt-16">
+    <MudItem xs="12" sm="8" md="4">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Register</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTextField @bind-Value="Model.FirstName" Label="First Name" Variant="Variant.Outlined" Class="mb-4" />
+                <MudTextField @bind-Value="Model.LastName" Label="Last Name" Variant="Variant.Outlined" Class="mb-4" />
+                <MudTextField @bind-Value="Model.Username" Label="Username" Variant="Variant.Outlined" Class="mb-4" />
+                <MudTextField @bind-Value="Model.Email" Label="Email" Variant="Variant.Outlined" Class="mb-4" />
+                <MudTextField @bind-Value="Model.Password" Label="Password" InputType="InputType.Password" Variant="Variant.Outlined" Class="mb-4" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleRegister">Register</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private RegisterRequest Model { get; set; } = new();
+
+    private async Task HandleRegister()
+    {
+        var response = await Http.PostAsJsonAsync("/api/auth/register", Model);
+
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+}
